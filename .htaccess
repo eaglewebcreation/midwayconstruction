@@ -1,0 +1,36 @@
+# Midway Construction & Dirtwork
+# PREVIEW BUILD: the header below keeps every page out of search engines.
+# Remove the X-Robots-Tag line (and the robots meta tag in each page) when the real domain goes live.
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# Clean page addresses: /index.html goes to /, and /services.html goes to /services
+RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+RewriteRule ^index\.html$ https://%{HTTP_HOST}/ [R=301,L]
+RewriteCond %{THE_REQUEST} \s/+([^\s?]+)\.html[\s?] [NC]
+RewriteRule ^ https://%{HTTP_HOST}/%1 [R=301,L]
+
+# Serve /services from services.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^([^/.]+)$ $1.html [L]
+
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+# Cache images, styles and scripts for a week
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 7 days"
+  ExpiresByType image/png "access plus 7 days"
+  ExpiresByType image/webp "access plus 7 days"
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+</IfModule>
